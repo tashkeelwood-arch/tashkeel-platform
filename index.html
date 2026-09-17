@@ -1,1 +1,415 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة تشكيل</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+        }
+        .login-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .login-header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .login-header p {
+            color: #666;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+        }
+        .hidden {
+            display: none;
+        }
+        .dashboard {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+        }
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
+        }
+        .dashboard-header h2 {
+            color: #333;
+            font-size: 24px;
+        }
+        .btn-logout {
+            padding: 8px 20px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        th {
+            background: #f5f5f5;
+            font-weight: 600;
+            color: #333;
+        }
+        td {
+            color: #666;
+        }
+        tr:hover {
+            background: #f9f9f9;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-new {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .status-progress {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        .status-complete {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+        .no-data {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-container" id="loginSection">
+            <div class="login-header">
+                <h1>🎨 منصة تشكيل</h1>
+                <p>لوحة التحكم الداخلية</p>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>اسم المستخدم</label>
+                    <input type="text" id="username" required placeholder="أدخل اسم المستخدم">
+                </div>
+                <div class="form-group">
+                    <label>كلمة المرور</label>
+                    <input type="password" id="password" required placeholder="أدخل كلمة المرور">
+                </div>
+                <button type="submit" class="btn-login">دخول</button>
+            </form>
+        </div>
 
+        <div id="dashboardSection" class="hidden">
+            <div class="dashboard">
+                <div class="dashboard-header">
+                    <h2>مرحباً، <span id="usernameDashboard">المستخدم</span></h2>
+                    <button class="btn-logout" onclick="logout()">تسجيل خروج</button>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('customers')">العملاء</button>
+                    <button class="tab-btn" onclick="switchTab('requests')">الطلبات</button>
+                    <button class="tab-btn" onclick="switchTab('purchases')">المشتريات</button>
+                </div>
+
+                <div id="customers" class="tab-content active">
+                    <table id="customersTable">
+                        <thead>
+                            <tr>
+                                <th>رقم التواصل</th>
+                                <th>اسم العميل</th>
+                                <th>رقم العميل</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div id="customersEmpty" class="no-data">جاري التحميل...</div>
+                </div>
+
+                <div id="requests" class="tab-content">
+                    <table id="requestsTable">
+                        <thead>
+                            <tr>
+                                <th>الحالة</th>
+                                <th>التاريخ</th>
+                                <th>الطلب/الوصف</th>
+                                <th>رقم العميل</th>
+                                <th>رقم الطلب</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div id="requestsEmpty" class="no-data">جاري التحميل...</div>
+                </div>
+
+                <div id="purchases" class="tab-content">
+                    <table id="purchasesTable">
+                        <thead>
+                            <tr>
+                                <th>الحالة</th>
+                                <th>التاريخ</th>
+                                <th>المادة</th>
+                                <th>المورد</th>
+                                <th>رقم المشتريات</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div id="purchasesEmpty" class="no-data">جاري التحميل...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzbBoPv8oRV6Pm_OW1fHMGIhMYUnv1yEIGzxJRPp5_pZXlu4gqSqQhLkVWAnKgd3FRz/exec';
+        
+        let allData = {
+            customers: [],
+            requests: [],
+            purchases: []
+        };
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === 'admin' && password === '1234') {
+                login(username);
+            } else {
+                alert('بيانات دخول غير صحيحة');
+            }
+        });
+
+        async function login(username) {
+            localStorage.setItem('currentUser', username);
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            document.getElementById('usernameDashboard').textContent = username;
+            await loadData();
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('dashboardSection').classList.add('hidden');
+            document.getElementById('loginForm').reset();
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        async function loadData() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                allData = data;
+                displayData();
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function displayData() {
+            displayCustomers();
+            displayRequests();
+            displayPurchases();
+        }
+
+        function displayCustomers() {
+            const tbody = document.querySelector('#customersTable tbody');
+            tbody.innerHTML = '';
+            
+            if (!allData.customers || allData.customers.length === 0) {
+                document.getElementById('customersEmpty').style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('customersEmpty').style.display = 'none';
+            allData.customers.forEach(customer => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${customer['رقم التواصل'] || ''}</td>
+                    <td>${customer['اسم العميل'] || ''}</td>
+                    <td>${customer['رقم العميل (ID)'] || ''}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function displayRequests() {
+            const tbody = document.querySelector('#requestsTable tbody');
+            tbody.innerHTML = '';
+            
+            if (!allData.requests || allData.requests.length === 0) {
+                document.getElementById('requestsEmpty').style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('requestsEmpty').style.display = 'none';
+            allData.requests.forEach(request => {
+                const status = request['الحالة (جديد / قيد العمل / مكتمل)'] || '';
+                const statusClass = status === 'جديد' ? 'new' : status === 'قيد العمل' ? 'progress' : 'complete';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><span class="status-badge status-${statusClass}">${status}</span></td>
+                    <td>${request['التاريخ'] || ''}</td>
+                    <td>${request['الطلب/الوصف'] || ''}</td>
+                    <td>${request['رقم العميل (رابط بالعميل)'] || ''}</td>
+                    <td>${request['رقم الطلب'] || ''}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function displayPurchases() {
+            const tbody = document.querySelector('#purchasesTable tbody');
+            tbody.innerHTML = '';
+            
+            if (!allData.purchases || allData.purchases.length === 0) {
+                document.getElementById('purchasesEmpty').style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('purchasesEmpty').style.display = 'none';
+            allData.purchases.forEach(purchase => {
+                const status = purchase['الحالة'] || '';
+                const statusClass = status === 'مطلوب' ? 'new' : status === 'قيد الاستقبال' ? 'progress' : 'complete';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><span class="status-badge status-${statusClass}">${status}</span></td>
+                    <td>${purchase['التاريخ'] || ''}</td>
+                    <td>${purchase['المادة'] || ''}</td>
+                    <td>${purchase['المورد'] || ''}</td>
+                    <td>${purchase['رقم المشتريات (ID)'] || ''}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        window.addEventListener('load', function() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('dashboardSection').classList.remove('hidden');
+                document.getElementById('usernameDashboard').textContent = currentUser;
+                loadData();
+            }
+        });
+    </script>
+</body>
+</html>
