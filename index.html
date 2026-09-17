@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>منصة تشكيل</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
         * {
             margin: 0;
@@ -268,14 +269,10 @@
         </div>
     </div>
 
-    <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbz0Pz7ftqzbyvVvnXidW7exr4U-DFdJxDSu3TxlxGjacehoz8LjNE0ijsDOJZkOgYA/exec';
-        
-        let allData = {
-            customers: [],
-            requests: [],
-            purchases: []
-        };
+    <script type="text/javascript">
+        google.charts.load('current', {'packages': ['corechart']});
+
+        const SHEET_ID = '1qhAZFBLU5hqVsw0uaYVwgGCxPH-Gb4qKq6CCaoexBkQ';
 
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -313,92 +310,109 @@
 
         async function loadData() {
             try {
-                const response = await fetch(API_URL);
-                const data = await response.json();
-                allData = data;
-                displayData();
+                const query1 = new google.visualization.Query(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=العملاء`);
+                const query2 = new google.visualization.Query(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=الطلبات`);
+                const query3 = new google.visualization.Query(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=المشتريات`);
+
+                query1.send((response) => {
+                    if (response.isError()) {
+                        console.error('Error fetching customers');
+                    } else {
+                        displayCustomers(response.getDataTable());
+                    }
+                });
+
+                query2.send((response) => {
+                    if (response.isError()) {
+                        console.error('Error fetching requests');
+                    } else {
+                        displayRequests(response.getDataTable());
+                    }
+                });
+
+                query3.send((response) => {
+                    if (response.isError()) {
+                        console.error('Error fetching purchases');
+                    } else {
+                        displayPurchases(response.getDataTable());
+                    }
+                });
             } catch (error) {
                 console.error('Error:', error);
             }
         }
 
-        function displayData() {
-            displayCustomers();
-            displayRequests();
-            displayPurchases();
-        }
-
-        function displayCustomers() {
+        function displayCustomers(dataTable) {
             const tbody = document.querySelector('#customersTable tbody');
             tbody.innerHTML = '';
             
-            if (!allData.customers || allData.customers.length === 0) {
+            if (dataTable.getNumberOfRows() === 0) {
                 document.getElementById('customersEmpty').style.display = 'block';
                 return;
             }
             
             document.getElementById('customersEmpty').style.display = 'none';
-            allData.customers.forEach(customer => {
+            for (let i = 0; i < dataTable.getNumberOfRows(); i++) {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${customer['رقم التواصل'] || ''}</td>
-                    <td>${customer['اسم العميل'] || ''}</td>
-                    <td>${customer['رقم العميل (ID)'] || ''}</td>
+                    <td>${dataTable.getValue(i, 2) || ''}</td>
+                    <td>${dataTable.getValue(i, 1) || ''}</td>
+                    <td>${dataTable.getValue(i, 0) || ''}</td>
                 `;
                 tbody.appendChild(row);
-            });
+            }
         }
 
-        function displayRequests() {
+        function displayRequests(dataTable) {
             const tbody = document.querySelector('#requestsTable tbody');
             tbody.innerHTML = '';
             
-            if (!allData.requests || allData.requests.length === 0) {
+            if (dataTable.getNumberOfRows() === 0) {
                 document.getElementById('requestsEmpty').style.display = 'block';
                 return;
             }
             
             document.getElementById('requestsEmpty').style.display = 'none';
-            allData.requests.forEach(request => {
-                const status = request['الحالة (جديد / قيد العمل / مكتمل)'] || '';
+            for (let i = 0; i < dataTable.getNumberOfRows(); i++) {
+                const status = dataTable.getValue(i, 4) || '';
                 const statusClass = status === 'جديد' ? 'new' : status === 'قيد العمل' ? 'progress' : 'complete';
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td><span class="status-badge status-${statusClass}">${status}</span></td>
-                    <td>${request['التاريخ'] || ''}</td>
-                    <td>${request['الطلب/الوصف'] || ''}</td>
-                    <td>${request['رقم العميل (رابط بالعميل)'] || ''}</td>
-                    <td>${request['رقم الطلب'] || ''}</td>
+                    <td>${dataTable.getValue(i, 3) || ''}</td>
+                    <td>${dataTable.getValue(i, 2) || ''}</td>
+                    <td>${dataTable.getValue(i, 1) || ''}</td>
+                    <td>${dataTable.getValue(i, 0) || ''}</td>
                 `;
                 tbody.appendChild(row);
-            });
+            }
         }
 
-        function displayPurchases() {
+        function displayPurchases(dataTable) {
             const tbody = document.querySelector('#purchasesTable tbody');
             tbody.innerHTML = '';
             
-            if (!allData.purchases || allData.purchases.length === 0) {
+            if (dataTable.getNumberOfRows() === 0) {
                 document.getElementById('purchasesEmpty').style.display = 'block';
                 return;
             }
             
             document.getElementById('purchasesEmpty').style.display = 'none';
-            allData.purchases.forEach(purchase => {
-                const status = purchase['الحالة'] || '';
+            for (let i = 0; i < dataTable.getNumberOfRows(); i++) {
+                const status = dataTable.getValue(i, 4) || '';
                 const statusClass = status === 'مطلوب' ? 'new' : status === 'قيد الاستقبال' ? 'progress' : 'complete';
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td><span class="status-badge status-${statusClass}">${status}</span></td>
-                    <td>${purchase['التاريخ'] || ''}</td>
-                    <td>${purchase['المادة'] || ''}</td>
-                    <td>${purchase['المورد'] || ''}</td>
-                    <td>${purchase['رقم المشتريات (ID)'] || ''}</td>
+                    <td>${dataTable.getValue(i, 3) || ''}</td>
+                    <td>${dataTable.getValue(i, 2) || ''}</td>
+                    <td>${dataTable.getValue(i, 1) || ''}</td>
+                    <td>${dataTable.getValue(i, 0) || ''}</td>
                 `;
                 tbody.appendChild(row);
-            });
+            }
         }
 
         window.addEventListener('load', function() {
