@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>منصة تشكيل</title>
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
@@ -25,20 +24,16 @@
         .dashboard-header h2 { color: #333; font-size: 24px; }
         .btn-logout { padding: 8px 20px; background: #f44336; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
         .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; }
-        .tab-btn { padding: 10px 20px; background: none; border: none; cursor: pointer; font-size: 14px; color: #666; border-bottom: 3px solid transparent; transition: all 0.3s; }
+        .tab-btn { padding: 10px 20px; background: none; border: none; cursor: pointer; font-size: 14px; color: #666; border-bottom: 3px solid transparent; }
         .tab-btn.active { color: #667eea; border-bottom-color: #667eea; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 12px; text-align: right; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
-        th { background: #f5f5f5; font-weight: 600; color: #333; }
-        td { color: #666; }
-        tr:hover { background: #f9f9f9; }
+        th { background: #f5f5f5; font-weight: 600; }
         .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
         .status-new { background: #e3f2fd; color: #1976d2; }
-        .status-progress { background: #fff3e0; color: #f57c00; }
         .status-complete { background: #e8f5e9; color: #388e3c; }
-        .no-data { text-align: center; color: #999; padding: 40px; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -75,84 +70,61 @@
                 </div>
 
                 <div id="customers" class="tab-content active">
-                    <table id="customersTable">
-                        <thead>
-                            <tr>
-                                <th>رقم التواصل</th>
-                                <th>اسم العميل</th>
-                                <th>رقم العميل</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
+                    <table>
+                        <thead><tr><th>رقم التواصل</th><th>اسم العميل</th><th>رقم العميل</th></tr></thead>
+                        <tbody id="customersBody"></tbody>
                     </table>
-                    <div id="customersEmpty" class="no-data">جاري التحميل...</div>
                 </div>
 
                 <div id="requests" class="tab-content">
-                    <table id="requestsTable">
-                        <thead>
-                            <tr>
-                                <th>الحالة</th>
-                                <th>التاريخ</th>
-                                <th>الطلب/الوصف</th>
-                                <th>رقم العميل</th>
-                                <th>رقم الطلب</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
+                    <table>
+                        <thead><tr><th>الحالة</th><th>التاريخ</th><th>الطلب</th><th>رقم العميل</th><th>رقم الطلب</th></tr></thead>
+                        <tbody id="requestsBody"></tbody>
                     </table>
-                    <div id="requestsEmpty" class="no-data">جاري التحميل...</div>
                 </div>
 
                 <div id="purchases" class="tab-content">
-                    <table id="purchasesTable">
-                        <thead>
-                            <tr>
-                                <th>الحالة</th>
-                                <th>التاريخ</th>
-                                <th>المادة</th>
-                                <th>المورد</th>
-                                <th>رقم المشتريات</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
+                    <table>
+                        <thead><tr><th>الحالة</th><th>التاريخ</th><th>المادة</th><th>المورد</th><th>رقم المشتريات</th></tr></thead>
+                        <tbody id="purchasesBody"></tbody>
                     </table>
-                    <div id="purchasesEmpty" class="no-data">جاري التحميل...</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        google.charts.load('current', {'packages': ['corechart']});
-
-        const SHEET_ID = '1qhAZFBLU5hqVsw0uaYVwgGCxPH-Gb4qKq6CCaoexBkQ';
+        const data = {
+            customers: [
+                { id: '1', name: 'معاذ', phone: '593078804' }
+            ],
+            requests: [
+                { id: '1', customerId: '1', desc: 'ديكور', date: '17-09-2026', status: 'جديد' }
+            ],
+            purchases: [
+                { id: '1', supplier: 'ديكورات صح', material: 'بطل شوود', date: '17-09-2026', status: 'تم التوصيل' }
+            ]
+        };
 
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            if (username === 'admin' && password === '1234') {
-                login(username);
+            if (document.getElementById('username').value === 'admin' && document.getElementById('password').value === '1234') {
+                login('admin');
             } else {
-                alert('بيانات دخول غير صحيحة');
+                alert('بيانات خاطئة');
             }
         });
 
-        async function login(username) {
-            localStorage.setItem('currentUser', username);
+        function login(username) {
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('dashboardSection').classList.remove('hidden');
             document.getElementById('usernameDashboard').textContent = username;
-            await loadData();
+            loadData();
         }
 
         function logout() {
-            localStorage.removeItem('currentUser');
             document.getElementById('loginSection').classList.remove('hidden');
             document.getElementById('dashboardSection').classList.add('hidden');
-            document.getElementById('loginForm').reset();
         }
 
         function switchTab(tab) {
@@ -162,149 +134,25 @@
             event.target.classList.add('active');
         }
 
-        async function loadData() {
-            try {
-                await loadCustomers();
-                await loadRequests();
-                await loadPurchases();
-            } catch (error) {
-                console.error('Error loading data:', error);
-            }
-        }
-
-        function loadCustomers() {
-            return new Promise((resolve) => {
-                const query = new google.visualization.Query(
-                    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=العملاء`
-                );
-                query.send((response) => {
-                    if (response.isError()) {
-                        console.error('Error loading customers');
-                        document.getElementById('customersEmpty').textContent = 'خطأ في تحميل البيانات';
-                    } else {
-                        displayCustomers(response.getDataTable());
-                    }
-                    resolve();
-                });
+        function loadData() {
+            let html = '';
+            data.customers.forEach(c => {
+                html += `<tr><td>${c.phone}</td><td>${c.name}</td><td>${c.id}</td></tr>`;
             });
-        }
+            document.getElementById('customersBody').innerHTML = html;
 
-        function loadRequests() {
-            return new Promise((resolve) => {
-                const query = new google.visualization.Query(
-                    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=الطلبات`
-                );
-                query.send((response) => {
-                    if (response.isError()) {
-                        console.error('Error loading requests');
-                        document.getElementById('requestsEmpty').textContent = 'خطأ في تحميل البيانات';
-                    } else {
-                        displayRequests(response.getDataTable());
-                    }
-                    resolve();
-                });
+            html = '';
+            data.requests.forEach(r => {
+                html += `<tr><td><span class="status-badge status-new">${r.status}</span></td><td>${r.date}</td><td>${r.desc}</td><td>${r.customerId}</td><td>${r.id}</td></tr>`;
             });
-        }
+            document.getElementById('requestsBody').innerHTML = html;
 
-        function loadPurchases() {
-            return new Promise((resolve) => {
-                const query = new google.visualization.Query(
-                    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=المشتريات`
-                );
-                query.send((response) => {
-                    if (response.isError()) {
-                        console.error('Error loading purchases');
-                        document.getElementById('purchasesEmpty').textContent = 'خطأ في تحميل البيانات';
-                    } else {
-                        displayPurchases(response.getDataTable());
-                    }
-                    resolve();
-                });
+            html = '';
+            data.purchases.forEach(p => {
+                html += `<tr><td><span class="status-badge status-complete">${p.status}</span></td><td>${p.date}</td><td>${p.material}</td><td>${p.supplier}</td><td>${p.id}</td></tr>`;
             });
+            document.getElementById('purchasesBody').innerHTML = html;
         }
-
-        function displayCustomers(dataTable) {
-            const tbody = document.querySelector('#customersTable tbody');
-            tbody.innerHTML = '';
-            
-            if (dataTable.getNumberOfRows() === 0) {
-                document.getElementById('customersEmpty').style.display = 'block';
-                return;
-            }
-            
-            document.getElementById('customersEmpty').style.display = 'none';
-            for (let i = 0; i < dataTable.getNumberOfRows(); i++) {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${dataTable.getValue(i, 2) || ''}</td>
-                    <td>${dataTable.getValue(i, 1) || ''}</td>
-                    <td>${dataTable.getValue(i, 0) || ''}</td>
-                `;
-                tbody.appendChild(row);
-            }
-        }
-
-        function displayRequests(dataTable) {
-            const tbody = document.querySelector('#requestsTable tbody');
-            tbody.innerHTML = '';
-            
-            if (dataTable.getNumberOfRows() === 0) {
-                document.getElementById('requestsEmpty').style.display = 'block';
-                return;
-            }
-            
-            document.getElementById('requestsEmpty').style.display = 'none';
-            for (let i = 0; i < dataTable.getNumberOfRows(); i++) {
-                const status = dataTable.getValue(i, 4) || '';
-                const statusClass = status === 'جديد' ? 'new' : status === 'قيد العمل' ? 'progress' : 'complete';
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><span class="status-badge status-${statusClass}">${status}</span></td>
-                    <td>${dataTable.getValue(i, 3) || ''}</td>
-                    <td>${dataTable.getValue(i, 2) || ''}</td>
-                    <td>${dataTable.getValue(i, 1) || ''}</td>
-                    <td>${dataTable.getValue(i, 0) || ''}</td>
-                `;
-                tbody.appendChild(row);
-            }
-        }
-
-        function displayPurchases(dataTable) {
-            const tbody = document.querySelector('#purchasesTable tbody');
-            tbody.innerHTML = '';
-            
-            if (dataTable.getNumberOfRows() === 0) {
-                document.getElementById('purchasesEmpty').style.display = 'block';
-                return;
-            }
-            
-            document.getElementById('purchasesEmpty').style.display = 'none';
-            for (let i = 0; i < dataTable.getNumberOfRows(); i++) {
-                const status = dataTable.getValue(i, 4) || '';
-                const statusClass = status === 'مطلوب' ? 'new' : status === 'قيد الاستقبال' ? 'progress' : 'complete';
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><span class="status-badge status-${statusClass}">${status}</span></td>
-                    <td>${dataTable.getValue(i, 3) || ''}</td>
-                    <td>${dataTable.getValue(i, 2) || ''}</td>
-                    <td>${dataTable.getValue(i, 1) || ''}</td>
-                    <td>${dataTable.getValue(i, 0) || ''}</td>
-                `;
-                tbody.appendChild(row);
-            }
-        }
-
-        window.addEventListener('load', function() {
-            const currentUser = localStorage.getItem('currentUser');
-            if (currentUser) {
-                document.getElementById('loginSection').classList.add('hidden');
-                document.getElementById('dashboardSection').classList.remove('hidden');
-                document.getElementById('usernameDashboard').textContent = currentUser;
-                loadData();
-            }
-        });
     </script>
 </body>
 </html>
