@@ -23,6 +23,8 @@
         .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; }
         .dashboard-header h2 { color: #333; font-size: 24px; }
         .btn-logout { padding: 8px 20px; background: #f44336; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        .btn-add { margin-bottom: 20px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .btn-add:hover { background: #5568d3; }
         .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; }
         .tab-btn { padding: 10px 20px; background: none; border: none; cursor: pointer; font-size: 14px; color: #666; border-bottom: 3px solid transparent; }
         .tab-btn.active { color: #667eea; border-bottom-color: #667eea; }
@@ -34,6 +36,14 @@
         .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
         .status-new { background: #e3f2fd; color: #1976d2; }
         .status-complete { background: #e8f5e9; color: #388e3c; }
+        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 15px; max-width: 500px; width: 90%; }
+        .modal-content h3 { margin-bottom: 20px; color: #333; }
+        .modal-content input { margin-bottom: 15px; }
+        .modal-buttons { display: flex; gap: 10px; }
+        .modal-buttons button { flex: 1; padding: 10px; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .btn-save { background: #667eea; }
+        .btn-cancel { background: #999; }
     </style>
 </head>
 <body>
@@ -70,6 +80,7 @@
                 </div>
 
                 <div id="customers" class="tab-content active">
+                    <button class="btn-add" onclick="openAddCustomer()">+ إضافة عميل جديد</button>
                     <table>
                         <thead><tr><th>رقم التواصل</th><th>اسم العميل</th><th>رقم العميل</th></tr></thead>
                         <tbody id="customersBody"></tbody>
@@ -89,6 +100,29 @@
                         <tbody id="purchasesBody"></tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نموذج إضافة عميل -->
+    <div id="addCustomerModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>إضافة عميل جديد</h3>
+            <div>
+                <label>رقم العميل:</label>
+                <input type="text" id="customerId">
+            </div>
+            <div>
+                <label>اسم العميل:</label>
+                <input type="text" id="customerName">
+            </div>
+            <div>
+                <label>رقم التواصل:</label>
+                <input type="text" id="customerPhone">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-save" onclick="saveCustomer()">حفظ</button>
+                <button class="btn-cancel" onclick="closeAddCustomer()">إلغاء</button>
             </div>
         </div>
     </div>
@@ -132,6 +166,33 @@
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(tab).classList.add('active');
             event.target.classList.add('active');
+        }
+
+        function openAddCustomer() {
+            document.getElementById('addCustomerModal').classList.remove('hidden');
+        }
+
+        function closeAddCustomer() {
+            document.getElementById('addCustomerModal').classList.add('hidden');
+            document.getElementById('customerId').value = '';
+            document.getElementById('customerName').value = '';
+            document.getElementById('customerPhone').value = '';
+        }
+
+        function saveCustomer() {
+            const id = document.getElementById('customerId').value;
+            const name = document.getElementById('customerName').value;
+            const phone = document.getElementById('customerPhone').value;
+            
+            if (!id || !name || !phone) {
+                alert('الرجاء ملء جميع الحقول');
+                return;
+            }
+            
+            data.customers.push({ id, name, phone });
+            loadData();
+            closeAddCustomer();
+            alert('تم إضافة العميل بنجاح!');
         }
 
         function loadData() {
